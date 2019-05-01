@@ -1,0 +1,3 @@
+In the spirit of [Elf Strenberg's simple bytecode interpreters series](https://elfsternberg.com/2019/04/17/worlds-simplest-bytecode-interpreter/), this repo will contain my own work through [Vladimir Kazanov's simple bytecode interpreters](https://github.com/vkazanov/bytecode-interpreters-post/blob/master/README.org).
+
+This is a diversion from and prelude to a different learning & development project where I tried implementing an LC3 VM in Rust. By breaking up a VM into incremental features, I expect the LC3 VM will become much more obvious and straightforward.
