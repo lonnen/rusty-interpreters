@@ -6,8 +6,8 @@ pub struct VM {
 pub enum Opcode {
     Inc,
     Dec,
-    Addi,
-    Subi,
+    Add(i64),
+    Sub(i64),
     Done,
 }
 
@@ -20,9 +20,9 @@ pub fn interpret(program: Vec<Opcode>) -> Option<i64> {
     for i in vm.program {
         vm.accumulate = match i {
             Opcode::Inc => vm.accumulate + 1,
-            Opcode::Dec => vm.accumulate + 2,
-            Opcode::Addi => vm.accumulate,
-            Opcode::Subi => vm.accumulate,
+            Opcode::Dec => vm.accumulate - 1,
+            Opcode::Add(i) => vm.accumulate + i,
+            Opcode::Sub(i) => vm.accumulate - i,
             Opcode::Done => break
         }
     }
@@ -71,5 +71,20 @@ mod tests {
     }
 
     #[test]
-    fn 
+    fn add_instruction() {
+        use Opcode::*;
+        assert_eq!(
+            interpret(vec![Inc, Dec, Add(12), Done]),
+            Some(12)
+        );
+    }
+
+    #[test]
+    fn subtract_instruction() {
+        use Opcode::*;
+        assert_eq!(
+            interpret(vec![Inc, Add(12), Sub(2), Done]),
+            Some(11)
+        );
+    }
 }
