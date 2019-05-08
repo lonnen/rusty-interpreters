@@ -41,7 +41,7 @@ pub fn interpret(program: Vec<Opcode>) -> Result<i64> {
     };
 
     for i in vm.program {
-        if let Some(err) = match i {
+        let op = match i {
             Opcode::Push(i) => {
                 vm.stack.push(i);
                 None
@@ -49,30 +49,37 @@ pub fn interpret(program: Vec<Opcode>) -> Result<i64> {
             Opcode::Add => make_opcode!(vm, +),
             Opcode::Sub => make_opcode!(vm, -),
             Opcode::Div => {
-                if let Some(a) = vm.stack.pop() {
-                    if a == 0 { 
-                        Some(ProgramError::DivisionByZero)
-                    } else if let Some(b) = vm.stack.pop() {
-                        vm.stack.push(b / a);
-                        None
-                    } else {
-                        Some(ProgramError::StackUnderflow)
-                    }
-                } else {
-                    
+                match vm.stack.pop() {
+                    Some(a) => {
+                        match a {
+                            0 => Some(ProgramError::DivisionByZero),
+                            _ => {
+                                match vm.stack.pop() {
+                                    Some(b) => {
+                                        vm.stack.push(b / a);
+                                        None
+                                    },
+                                    _ => Some(ProgramError::StackUnderflow)
+                                }
+                            }
+                        }
+                    },
+                    _ => Some(ProgramError::StackUnderflow)
                 }
             },
             Opcode::Mul => make_opcode!(vm, *),
             Opcode::Done => break
-        } {
-            return Err(err);
+        };
+
+        match op {
+            Some(err) => return Err(err),
+            _ => {},
         }
     }
 
-    if let Some(res) = vm.stack.pop() {
-        Ok(res)
-    } else {
-        Err(ProgramError::StackUnderflow)
+    match vm.stack.pop() {
+        Some(res) => Ok(res),
+        _ => Err(ProgramError::StackUnderflow),
     }
 }
 
