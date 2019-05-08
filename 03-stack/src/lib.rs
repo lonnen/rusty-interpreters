@@ -17,6 +17,8 @@ pub enum Opcode {
 #[derive(Debug)]
 pub enum ProgramError {
     StackUnderflow,
+    DivisionByZero,
+    // UnknownOpcode, // compiler ensures this can never happen
 }
 
 type Result<T> = result::Result<T, ProgramError>;
@@ -46,7 +48,20 @@ pub fn interpret(program: Vec<Opcode>) -> Result<i64> {
             },
             Opcode::Add => make_opcode!(vm, +),
             Opcode::Sub => make_opcode!(vm, -),
-            Opcode::Div => make_opcode!(vm, /),
+            Opcode::Div => {
+                if let Some(a) = vm.stack.pop() {
+                    if a == 0 { 
+                        Some(ProgramError::DivisionByZero)
+                    } else if let Some(b) = vm.stack.pop() {
+                        vm.stack.push(b / a);
+                        None
+                    } else {
+                        Some(ProgramError::StackUnderflow)
+                    }
+                } else {
+                    
+                }
+            },
             Opcode::Mul => make_opcode!(vm, *),
             Opcode::Done => break
         } {
@@ -73,5 +88,8 @@ mod tests {
         assert_eq!(interpret(vec![Push(2), Push(3), Mul]).unwrap(), 6);
         assert_eq!(interpret(vec![Push(7), Push(1), Div, Done]).unwrap(), 7);
         assert_eq!(interpret(vec![Push(7), Push(5), Add, Push(3), Add, Push(3), Div, Done]).unwrap(), 5);
+        assert_eq!(interpret(vec![Push(0), Push(2), Div, Done]).unwrap(), 0);
+        assert!(interpret(vec![Push(2), Push(0), Div, Done]).is_err());
+        assert!(interpret(vec![Push(2), Sub]).is_err());
     }
 }
