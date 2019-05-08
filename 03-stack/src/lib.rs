@@ -11,7 +11,6 @@ pub enum Opcode {
     Sub,
     Div,
     Mul,
-    // PopRes,
     Done,
 }
 
@@ -70,5 +69,9 @@ mod tests {
     fn inc() {
         use Opcode::*;
         assert_eq!(interpret(vec![Push(2)]).unwrap(), 2);
+        assert_eq!(interpret(vec![Push(3), Push(2), Sub, Done]).unwrap(), 1);
+        assert_eq!(interpret(vec![Push(2), Push(3), Mul]).unwrap(), 6);
+        assert_eq!(interpret(vec![Push(7), Push(1), Div, Done]).unwrap(), 7);
+        assert_eq!(interpret(vec![Push(7), Push(5), Add, Push(3), Add, Push(3), Div, Done]).unwrap(), 5);
     }
 }
