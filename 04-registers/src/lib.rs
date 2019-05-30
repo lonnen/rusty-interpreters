@@ -28,28 +28,29 @@ type Result<T> = result::Result<T, ProgramError>;
 pub fn interpret(program: Vec<Opcode>) -> Result<i64> {
     let mut vm = VM {
         program,
-        stack: [0; REGISTER_COUNT],
+        registers: [0; REGISTER_COUNT],
     };
 
     for op in vm.program {
         match op {
-            Opcode::Load(source_0, imm) => program.registers[r0] = imm,
+            Opcode::Load(source_0, imm) => vm.registers[source_0] = imm,
             Opcode::Add(source_0, source_1, destination) => {
-
+                vm.registers[destination] = vm.registers[source_0] + vm.registers[source_1]
             },
             Opcode::Sub(source_0, source_1, destination) => {
-
+                vm.registers[destination] = vm.registers[source_0] - vm.registers[source_1]
             },
             Opcode::Mul(source_0, source_1, destination) => {
-                
+                vm.registers[destination] = vm.registers[source_0] * vm.registers[source_1]
             },
             Opcode::Div(source_0, source_1, destination) => {
-
+                vm.registers[destination] = vm.registers[source_0] / vm.registers[source_1]
             }
-            Opcode::Done(source_0) => return Ok(vm.registers)
+            Opcode::Done(source_0) => return Ok(vm.registers[source_0])
         }
-        Err(ProgramError::UnexpectedTermination)
     }
+
+    Err(ProgramError::UnexpectedTermination)
 }
 
 #[cfg(test)]
@@ -59,7 +60,7 @@ mod tests {
     #[test]
     fn inc() {
         use Opcode::*;
-        assert_eq!(interpret(vec![Load(0, 2), Done(0)].unwrap(), 2);
+        assert_eq!(interpret(vec![Load(0, 2), Done(0)]).unwrap(), 2);
         assert_eq!(interpret(vec![Load(1,2), Load(2, 3), Mul(1, 2, 0), Done(0)]).unwrap(), 6);
         assert_eq!(
             interpret(vec![
