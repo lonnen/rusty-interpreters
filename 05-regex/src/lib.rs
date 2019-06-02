@@ -11,19 +11,28 @@ pub enum Opcode {
     Match,
 }
 
-pub fn vm_match_recur(
-    program: &[Opcode], mut instruction: isize, mut symbol: char) -> bool {
+pub fn vm_match_recur(program: &[Opcode], sample: &[char], mut instruction: isize, mut symbol: isize) -> bool {
     loop {
+        // ensure the loop is still within bounds
+        if symbol < 0 || (symbol as usize) > sample.len() || instruction < 0 || (instruction as usize) > program.len() {
+            return false;
+        }
+        
         match program[instruction as usize] {
             Opcode::Char(c) => {
                 instruction += 1;
-                
+                if c == sample[symbol as usize] {
+                    instruction += 1;
+                    symbol += 1;
+                } else {
+                    false;
+                }
             },
             Opcode::Jump(i) => {
                 instruction += i;
             },
             Opcode::Or(left, right) => {
-                if vm_match_recur(program, instruction + left, symbol) {
+                if vm_match_recur(program, sample, instruction + left, symbol) {
                     return true;
                 }
                 instruction += right;
@@ -34,7 +43,8 @@ pub fn vm_match_recur(
 }
 
 pub fn vm_match(program: Vec<Opcode>, sample: &str) -> bool {
-    return true; // stubbed
+    let s: Vec<char> = sample.chars().collect();
+    return vm_match_recur(&program, &s, 0, 0);
 }
 
 #[cfg(test)]
