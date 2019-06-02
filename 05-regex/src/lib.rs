@@ -17,15 +17,14 @@ pub fn vm_match_recur(program: &[Opcode], sample: &[char], mut instruction: isiz
         if symbol < 0 || (symbol as usize) > sample.len() || instruction < 0 || (instruction as usize) > program.len() {
             return false;
         }
-        
+
         match program[instruction as usize] {
             Opcode::Char(c) => {
-                instruction += 1;
                 if c == sample[symbol as usize] {
                     instruction += 1;
                     symbol += 1;
                 } else {
-                    false;
+                    return false;
                 }
             },
             Opcode::Jump(i) => {
@@ -54,5 +53,54 @@ mod tests {
     #[test]
     fn ops() {
         use Opcode::*;
+
+        // missing match opcode is expected to panic
+        // we could replicate the Result type 
+        let result = std::panic::catch_unwind(|| vm_match(vec![], "anything"));
+        assert!(result.is_err());
+
+        // ""
+        assert!(vm_match(
+            vec![Match],
+            "anything"
+        ));
+
+        // "a"
+        assert!(vm_match(
+            vec![Char('a'), Match],
+            "ab"
+        ));
+    }
+
+    #[test]
+    fn sequence() {
+        use Opcode::*;
+
+        // "ab"
+        assert!(vm_match(vec![Char('a'), Char('b'), Match], "ab"));
+    }
+
+    #[test]
+    fn or() {
+        use Opcode::*;
+
+        // "(a|b)c"
+        assert!(vm_match(
+            vec![Or(1, 3), Char('a'), Jump(2), Char('b'), Jump(1), Char('c'), Match],
+            "ac"
+        ));
+
+        assert!(vm_match(
+            vec![Or(1, 3), Char('a'), Jump(2), Char('b'), Jump(1), Char('c'), Match],
+            "bc"
+        ));
+
+        assert_eq!(
+            vm_match(
+                vec![Or(1, 3), Char('a'), Jump(2), Char('b'), Jump(1), Char('c'), Match],
+                "ab"
+            ),
+            false
+        );
     }
 }
