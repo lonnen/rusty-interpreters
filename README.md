@@ -35,7 +35,7 @@ Kazanov points out that in practice, register-based VMs often end up emulating a
 
 The tests call some of error states we're not handling. Since this is a toy and the fixes for these errors are straightforward, they are left an exercise. A bounds checking macro is one place to start. I suspect this is also a good candidate for fuzzing with quick check.
 
-## VM05
+## VM05 - Regex lite
 
 The fifth VM is a significant departure from the previous four. It's specialized towards interpreting regular expressions, specifically it should be able to satisfy all of Kleene's Regular Expressions without a closure (*). 4 codes and less than 50 lines accomplish a reasonably capable VM here that uses recursion instead of explicit state. Despite its size, it can express many useful regular expressions over ascii.
 
